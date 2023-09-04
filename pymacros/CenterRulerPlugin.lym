@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>import os 
+import pya
+
+class CenterRulerSetupDock(pya.QDockWidget):
+    def __init__(self):
+        super(CenterRulerSetupDock, self).__init__()
+        self.ctrSetup = CenterRulerSetupWidget()
+        self.setWidget (self.ctrSetup)
+        self.setWindowTitle("Center Ruler")
+        
+    def setHostValue(self, host, rulerType, snapRange):
+        self.ctrSetup.setHostValue(host, rulerType, snapRange)
+        
+class CenterRulerSetupWidget(pya.QWidget):
+    def __init__(self):
+        super(CenterRulerSetupWidget, self).__init__()
+        self.host         = None
+        self.rulerTypeLB  = pya.QLabel("Ruler Type:")
+        self.snpRngLB     = pya.QLabel("Snap Range:")
+        self.snpRngSfxLB  = pya.QLabel("um")
+        self.snpRngDSB    = pya.QDoubleSpinBox()
+        self.rulerTypeCB  = pya.QComboBox()
+        self.layout       = pya.QGridLayout()
+
+        self.rulerTypeCB.addItems(["Triangle", "Box", "XY"])
+        self.snpRngDSB.setRange (0.001, 10000)
+        self.snpRngDSB.setDecimals (3)
+        self.snpRngDSB.setSingleStep (1)
+
+        self.layout.addWidget(self.rulerTypeLB,  0, 0, 1, 1)
+        self.layout.addWidget(self.rulerTypeCB,  0, 1, 1, 1)
+
+        self.layout.addWidget(self.snpRngLB,     1, 0, 1, 1)
+        self.layout.addWidget(self.snpRngDSB,    1, 1, 1, 1)
+        self.layout.addWidget(self.snpRngSfxLB,  1, 2, 1, 1)
+                
+        self.layout.setRowStretch(2, 1)
+        self.setLayout(self.layout)
+        
+        self.snpRngDSB.valueChanged (lambda :self.updateHostValue())
+        self.rulerTypeCB.currentIndexChanged (lambda :self.updateHostValue())
+        
+        self.antOutline = {
+            "Box"      :	pya.Annotation.OutlineBox,
+            "Triangle" :	pya.Annotation.	OutlineDiagXY,
+            "XY"       : 	pya.Annotation.	OutlineXY
+        }
+        
+    def setHostValue(self, host, roundRadius, searchSize):
+        self.host = host
+        self.snpRngDSB.setValue(searchSize)    
+    
+    def updateHostValue(self): 
+        if self.host: 
+            self.host.searchSize   = self.snpRngDSB.value
+            self.host.rulerOutline = self.antOutline[self.rulerTypeCB.currentText]
+         
+    def hideEvent(self, event):
+        if self.host:
+            self.host.deactive()
+        event.accept()
+                
+class CenterRulerPlugin(pya.Plugin):
+    def __init__(self, view):
+        super(CenterRulerPlugin, self).__init__()
+        self.ctrlDock       = None
+        self.marks          = []
+        self.activeMarkers  = []
+        self.ruler          = None
+        self.rulerPts       = None
+        self.start_point    = None
+        self.view           = view
+        self.searchSize     = 1.0
+        
+        self.selectedObjBox = None
+        self.withSelected   = False     
+
+        self.rulerOutline   = pya.Annotation.OutlineDiagXY
+        self.rulerStyle     = pya.Annotation.StyleArrowBoth
+        
+    def validselect(self):
+        unit         = self.view.active_cellview().layout().dbu
+        selectedObjs = [o for o in self.view.each_object_selected()]
+        if len(selectedObjs) == 1:
+            o                   = selectedObjs[0]
+            if not(o.is_cell_inst()):
+                self.selectedObjBox = o.shape.polygon.transformed(o.trans()).to_dtype(unit).bbox()
+            else:
+                self.selectedObjBox = o.inst().bbox().transformed(o.trans()).to_dtype(unit)
+            self.withSelected   = True
+        else:
+            self.withSelected   = False  
+              
+    def activated(self):
+        self.validselect()
+        if self.withSelected:
+            if not(self.ctrlDock):
+                mw   = pya.Application.instance().main_window()
+                self.ctrlDock = CenterRulerSetupDock()
+                mw.addDockWidget(pya.Qt_DockWidgetArea.RightDockWidgetArea, self.ctrlDock)
+                self.ctrlDock.setHostValue(self, None, self.searchSize)
+            self.ctrlDock.show()
+        
+    def _clear_marker(self):
+        if self.ruler is not None:
+            self.ruler._destroy()
+
+        for marker in self.activeMarkers:
+            marker._destroy()
+            
+        self.ruler         = None   
+        self.rulerPts      = None 
+        self.start_point   = None
+        self.marks         = []
+        self.activeMarkers = []
+        
+    
+    def _update_marker(self):
+
+        if self.ruler is None:
+            self.ruler = pya.Annotation()
+            self.view.insert_annotation(self.ruler)
+            
+        for marker in self.activeMarkers:
+            marker._destroy()
+        self.activeMarkers = []
+            
+        for mkDict in self.marks:
+            marker = pya.Marker(self.view)
+            data   = mkDict["mark"]
+            mkType = mkDict["type"]
+
+            marker.set(data)
+            marker.line_style  = 0 
+            marker.vertex_size = 0  
+            
+            if mkType == "vertex":
+                marker.vertex_size = 8 
+                
+            if mkType == "edge":
+                marker.vertex_size = 4  
+                
+            if mkType == "cursor":
+                marker.line_style = 1 
+                
+            self.activeMarkers.append(marker)
+                    
+            
+        self.ruler.outline = self.rulerOutline
+        self.ruler.style   = self.rulerStyle
+        self.ruler.points  = self.rulerPts             
+
+        
+    
+    def deactivated(self):
+        self._clear_marker()
+        self.ungrab_mouse()
+        if (self.ctrlDock):
+            self.ctrlDock.hide()
+            
+    def deactive(self):
+        esc_key  = 16777216 
+        keyPress = pya.QKeyEvent(pya.QKeyEvent.KeyPress, esc_key, pya.Qt.NoModifier)
+        pya.QApplication.sendEvent(self.view.widget(), keyPress)  
+        
+    def mouse_click_event(self, p, buttons, prio):
+        if prio:
+            self._clear_marker()
+            self.ungrab_mouse()
+
+            return True
+        return False
+    
+
+    
+    def mouse_moved_event(self, p, buttons, prio):
+        if prio :
+            if  not(self.withSelected) :
+                pya.QToolTip().showText( pya.QCursor.pos, "Select one shape for split shape") 
+                self.deactive()
+                return True
+                
+            if self.ruler is None:
+                center           = self.selectedObjBox.center()
+                self.rulerPts    = [center, center]
+                self.start_point = center.dup()
+                self._update_marker()
+                self.grab_mouse()
+                
+            else:
+                cellView        = self.view.active_cellview()
+                unit            = cellView.layout().dbu
+                cell            = cellView.cell
+                minDistance     = self.searchSize
+                self.rulerPts   = [self.start_point, p]
+                self.marks = []
+                self.set_cursor(pya.Cursor.Cross)
+           
+                for hoveredShape in self.shapeInRange(p, self.searchSize):
+                    center     = hoveredShape.bbox().center()
+                    self.marks = self.centerMark(hoveredShape)
+                    
+                    if self.vertexInRange(p, center, self.searchSize):
+                        epDistance = center.distance(p)
+                        if epDistance &lt;= minDistance:
+                            minDistance   = epDistance
+                            self.rulerPts = [self.start_point, self.snapPoint(p, center)]
+                        
+                    for e in hoveredShape.each_edge():
+                        if self.edgeInRange(p, e, self.searchSize):
+                            
+                            snapToVertex = False
+                            for v in [e.p1, e.p2]:
+                                if self.vertexInRange(p, v, self.searchSize):
+                                    snapToVertex = True
+                                    epDistance = v.distance(p)
+                                    if epDistance &lt;= minDistance:
+                                        minDistance   = epDistance
+                                        self.rulerPts = [self.start_point, self.snapPoint(p, v)]
+                                        self.marks.append(self.vertexMark(v))
+                                        
+                            if not(snapToVertex):            
+                                epDistance = e.distance_abs(p)
+                                if epDistance &lt;= minDistance:
+                                    minDistance   = epDistance
+                                    self.edge     = e
+                                    self.rulerPts = [self.start_point, self.snapPoint(p, e)]
+                                    self.marks.append(self.edgeMark(e))                                                
+                            
+                self.marks.append(self.cursorMark(p, self.searchSize))
+                self._update_marker()
+
+            return True
+        return False
+        
+    def cursorMark(self, p, detectRange):
+        offset = pya.DVector(detectRange, detectRange)
+        return {
+            "mark" : pya.DBox(p - offset, p + offset), 
+            "type" : "cursor"
+        }   
+             
+    def centerMark(self, shape):
+        b  = shape.bbox()
+        c  = b.center()
+        r  = min([b.width(), b.height()]) * 0.1
+        vx = pya.DVector(r, 0)
+        vy = pya.DVector(0, r)
+        return [{
+            "mark" : pya.DEdge(c + vy, c - vy), 
+            "type" : "center"
+        },{
+            "mark" : pya.DEdge(c + vx, c - vx), 
+            "type" : "center"
+        }]
+        
+    def edgeMark(self, edge):
+        return {
+            "mark" : edge, 
+            "type" : "edge"
+        }
+        
+    def vertexMark(self, vertex):
+        return {
+            "mark" : pya.DEdge(vertex, vertex), 
+            "type" : "vertex"
+        }    
+        
+    def vertexInRange(self, point, vertex, detectRange):
+        detected   = False
+        offset     = pya.DVector(detectRange, detectRange)
+        detectArea = pya.DBox(vertex - offset, vertex + offset )
+        if detectArea.contains(point):
+            detected = True
+        return detected
+        
+    def edgeInRange(self, point, edge, detectRange):
+        detected   = False
+        detectArea = pya.DPath([edge.p1, edge.p2], detectRange * 2).simple_polygon()
+        if detectArea.inside(point):
+            detected = True
+        return detected
+    
+    def shapeInRange(self, point, detectRange):
+        result        = []
+        cellView      = self.view.active_cellview()
+        unit          = cellView.layout().dbu
+        cell          = cellView.cell
+        visibleLayers = [layerProp.layer_index() for layerProp in self.view.each_layer() if layerProp.visible]
+        rngVector     = pya.DVector(detectRange, detectRange)
+        searchBox     = pya.DBox(point - rngVector, point + rngVector)
+                       
+        for li in visibleLayers:
+            for o in cell.begin_shapes_rec_touching(li, searchBox):
+                result.append(o.shape().polygon.transformed(o.trans()).to_dtype(unit))
+        return result
+        
+    def snapPoint(self, point, edge_point): 
+        if isinstance(edge_point, pya.DEdge):
+            edge = edge_point
+            dx   = edge.p2.x - edge.p1.x 
+            dy   = edge.p2.y - edge.p1.y 
+            if dx == 0:
+                return pya.DPoint(edge.p1.x, point.y)
+            if dy == 0:
+                return pya.DPoint(point.x, edge.p1.y)
+            else:
+                return pya.DPoint(point.x,(point.x - edge.p1.x)/dx * dy + edge.p1.y)
+        if isinstance(edge_point, pya.DPoint):
+            return edge_point       
+        return None
+                
+                
+
+
+class CenterRulerPluginFactory(pya.PluginFactory):
+    def __init__(self):
+        super(CenterRulerPluginFactory, self).__init__()
+        iconPath = str(os.path.dirname(__file__)) + "/CenterRulerIcon/%s.png"
+        self.register(-1000, "Center Ruler", "Center Ruler", iconPath % "icon")
+
+    def create_plugin(self, manager, root, view):
+        return CenterRulerPlugin(view)
+
+CenterRulerPluginFactory.instance = CenterRulerPluginFactory()</text>
+</klayout-macro>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<salt-grain>
+ <name>CenterRulerPlugin</name>
+ <token/>
+ <hidden>false</hidden>
+ <version>0.0</version>
+ <api-version/>
+ <title>Center ruler plugin</title>
+ <doc>Provides a ruler that snaps to selected shape/object center</doc>
+ <doc-url>https://github.com/s910324/CenterRulerPlugin</doc-url>
+ <url/>
+ <license>GPLv3</license>
+ <author>RawrRanger</author>
+ <author-contact/>
+ <authored-time/>
+ <installed-time>2023-09-04T19:18:14</installed-time>
+ <icon>iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAA0RJREFUSImllm9IE2Ecx7+DoBdrkeUUCmoEYSTzRRQVRjP1RX+sU1ojIaKywDA42LJeJCnBKOiPGTEqosw3IgXZUDHKFhEKjUiN8KjdnbbUmS3P6H/BtxfNY5unZXvggeM57vvh+f5+z/cekESK0xwKhTyCIPSFQiEPSXP8+5TFFUXx5OXljSqKwlLXjmFJkirjISmJy7LsdjqdQ1lZWQy036XW42fp1g3DkiQdJWlJBWCWZdltt9vH/X4/P42NkuEuMniZWlMZS/Ozdch/21JUVBRpbW1lRkYGO25fJbtvkvc85M1Car5clm5cMSxJUqWJJGYwzLIsl7vd7srOzs7MYDCI/t4ncO2rwNNLe2DDAPD9IwBgIPoNYrtJmgnArKpquSAIJ7xe71y73Q7b/FnASA/6ux/BhjfA5xEAwPjXXyi//XGoxnfrwow8T7ClrZnV4h6yq5a8s5e84SBvOKj5crkr3z4Yq8GcGYmnp6dTVVUG7rfTumAeAZAth5LEs3Xxf+mihG5RVZUkyUg31bZzfwANhVOK/w0w2ZaODn4d7GWgvoY+cTMB8PTOpWw4uJzb1i2LJItPB5hsSyDABfPT6Nlfwge1+zl6vZgAqJ5ZQ0fOkvfFxcX+nJycNcla/2zL29cvWHV4N0daT5LNf4oKQLeloKBgBYDjAGZNBzC0hT++sKX+LFtqK/Siar5cAmBCQYFVALZOBTC0xWq1Ug228eKx3RxpKicbCvVWBMCEggJzAbiNAIa2VFdXE0Aqs2ZqW0hyPEy+aiEfe3mpbCWlU6sTWjG2A8TtIB3A4YS1ieCaZEvfc1J9SHadJ5v38q6YzfX2xdH4vDcAFABwxK+ZBEHoq6urW04SNpsNANAfkmCbPQa86wUiPdAGenGg6UPkm2XpM4vFcqixsTEMACaTiSRNseeFAMoAnCb5U08wRVE8LpcrHI1GqY9Itx6/2uW8iWypFEUxE8ARAFsALIr5nAlgOwARgNXoHJhlWXbrkOgr8uUt8mEVtWubJmcLkAZgI4CKGECMARcaHdqELnI5S8LRp43kYy+1+pKEVDT8OKkG0wH0P5VriyOsXHHqtjDplpAKAJy4ghSuNbyCGABq/gb4DfofforcG4gUAAAAAElFTkSuQmCC</icon>
+ <screenshot/>
+</salt-grain>
