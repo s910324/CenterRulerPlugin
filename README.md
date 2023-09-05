@@ -17,3 +17,5 @@ After installation the app can be accessed through toolbar, center ruler icon
 * Hightlight center when hovered
 * adjustable snap range
 * adjustable ruler outline
+* adjustable ruler style
+* show circumference
