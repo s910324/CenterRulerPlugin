@@ -6,7 +6,7 @@
  <prolog/>
  <epilog/>
  <doc/>
- <autorun>true</autorun>
+ <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <priority>0</priority>
  <shortcut/>
@@ -17,6 +17,7 @@
  <dsl-interpreter-name/>
  <text>import os 
 import pya
+import math
 
 class CenterRulerSetupDock(pya.QDockWidget):
     def __init__(self):
@@ -25,53 +26,94 @@ class CenterRulerSetupDock(pya.QDockWidget):
         self.setWidget (self.ctrSetup)
         self.setWindowTitle("Center Ruler")
         
-    def setHostValue(self, host, rulerType, snapRange):
-        self.ctrSetup.setHostValue(host, rulerType, snapRange)
+    def setHostValue(self, host, rulerType, rulerStyle, snapRange, showCircumf):
+        self.ctrSetup.setHostValue(host, rulerType, rulerStyle, snapRange, showCircumf)
         
 class CenterRulerSetupWidget(pya.QWidget):
     def __init__(self):
         super(CenterRulerSetupWidget, self).__init__()
         self.host         = None
         self.rulerTypeLB  = pya.QLabel("Ruler Type:")
+        self.rulerStyleLB = pya.QLabel("Ruler Style:")
         self.snpRngLB     = pya.QLabel("Snap Range:")
+        self.showCircfLB  = pya.QLabel("Show Circumference:")
         self.snpRngSfxLB  = pya.QLabel("um")
         self.snpRngDSB    = pya.QDoubleSpinBox()
         self.rulerTypeCB  = pya.QComboBox()
+        self.rulerStyleCB = pya.QComboBox()
+        self.showCircfCB  = pya.QCheckBox ("")
         self.layout       = pya.QGridLayout()
-
-        self.rulerTypeCB.addItems(["Triangle", "Box", "XY"])
+        
         self.snpRngDSB.setRange (0.001, 10000)
         self.snpRngDSB.setDecimals (3)
         self.snpRngDSB.setSingleStep (1)
-
+        self.snpRngDSB.setValue(1)  
+        
         self.layout.addWidget(self.rulerTypeLB,  0, 0, 1, 1)
         self.layout.addWidget(self.rulerTypeCB,  0, 1, 1, 1)
-
-        self.layout.addWidget(self.snpRngLB,     1, 0, 1, 1)
-        self.layout.addWidget(self.snpRngDSB,    1, 1, 1, 1)
-        self.layout.addWidget(self.snpRngSfxLB,  1, 2, 1, 1)
-                
-        self.layout.setRowStretch(2, 1)
+        
+        self.layout.addWidget(self.rulerStyleLB, 1, 0, 1, 1)
+        self.layout.addWidget(self.rulerStyleCB, 1, 1, 1, 1)
+        
+        self.layout.addWidget(self.snpRngLB,     2, 0, 1, 1)
+        self.layout.addWidget(self.snpRngDSB,    2, 1, 1, 1)
+        self.layout.addWidget(self.snpRngSfxLB,  2, 2, 1, 1)
+         
+        self.layout.addWidget(self.showCircfLB,  3, 0, 1, 1)
+        self.layout.addWidget(self.showCircfCB,  3, 1, 1, 1)
+                       
+        self.layout.setRowStretch(4, 1)
         self.setLayout(self.layout)
         
         self.snpRngDSB.valueChanged (lambda :self.updateHostValue())
         self.rulerTypeCB.currentIndexChanged (lambda :self.updateHostValue())
+        self.rulerStyleCB.currentIndexChanged (lambda :self.updateHostValue())
+        self.showCircfCB.stateChanged (lambda :self.updateHostValue())
         
         self.antOutline = {
-            "Box"      :	pya.Annotation.OutlineBox,
-            "Triangle" :	pya.Annotation.	OutlineDiagXY,
-            "XY"       : 	pya.Annotation.	OutlineXY
+            "Diagnal"    : pya.Annotation.OutlineDiag,
+            "TriangleXY" : pya.Annotation.OutlineDiagXY,
+            "TriangleYX" :	 pya.Annotation.OutlineDiagYX,
+            "Box"        : pya.Annotation.OutlineBox,
+            "XY"         : pya.Annotation.OutlineXY,
+            "YX"         : pya.Annotation.OutlineYX,
         }
         
-    def setHostValue(self, host, roundRadius, searchSize):
+        self.antStyle = {
+            "Plan line"          : pya.Annotation.StyleLine,
+            "Ruler"              : pya.Annotation.StyleRuler,
+            "Arrow at both ends" : pya.Annotation.StyleArrowBoth,
+            "Arrow at end"       : pya.Annotation.StyleArrowEnd,
+            "Arrow at start"     : pya.Annotation.StyleArrowStart,
+            "Cross at both ends" : pya.Annotation.StyleCrossBoth,
+            "Cross at end"       : pya.Annotation.StyleCrossEnd,
+            "Cross at start"     : pya.Annotation.StyleCrossStart,
+        }
+        
+        self.rulerTypeCB.addItems([key for key in self.antOutline])
+        self.rulerStyleCB.addItems([key for key in self.antStyle])
+        
+    def setHostValue(self, host, rulerType, rulerStyle, snapRange, showCircumf):
         self.host = host
-        self.snpRngDSB.setValue(searchSize)    
+        
+        for i, key in enumerate(self.antOutline):
+            if self.antOutline[key] == rulerType:
+                self.rulerTypeCB.setCurrentIndex(i)
+            
+        for i, key in enumerate(self.antStyle):
+            if self.antStyle[key] == rulerStyle:
+                self.rulerTypeCB.setCurrentIndex(i) 
+                       
+        self.snpRngDSB.setValue(snapRange)    
+        self.showCircfCB.setCheckState( pya.Qt.CheckState.Checked if showCircumf else pya.Qt.CheckState.Unchecked )
     
     def updateHostValue(self): 
         if self.host: 
             self.host.searchSize   = self.snpRngDSB.value
             self.host.rulerOutline = self.antOutline[self.rulerTypeCB.currentText]
-         
+            self.host.rulerStyle   = self.antStyle[self.rulerStyleCB.currentText]
+            self.host.showCircumf  = self.showCircfCB.isChecked() 
+                     
     def hideEvent(self, event):
         if self.host:
             self.host.deactive()
@@ -85,15 +127,19 @@ class CenterRulerPlugin(pya.Plugin):
         self.activeMarkers  = []
         self.ruler          = None
         self.rulerPts       = None
+        self.circumfRuler   = None
+        
         self.start_point    = None
         self.view           = view
         self.searchSize     = 1.0
         
+        self.showCircumf    = False
         self.selectedObjBox = None
         self.withSelected   = False     
 
         self.rulerOutline   = pya.Annotation.OutlineDiagXY
-        self.rulerStyle     = pya.Annotation.StyleArrowBoth
+        self.rulerStyle     = pya.Annotation.StyleLine
+
         
     def validselect(self):
         unit         = self.view.active_cellview().layout().dbu
@@ -115,29 +161,60 @@ class CenterRulerPlugin(pya.Plugin):
                 mw   = pya.Application.instance().main_window()
                 self.ctrlDock = CenterRulerSetupDock()
                 mw.addDockWidget(pya.Qt_DockWidgetArea.RightDockWidgetArea, self.ctrlDock)
-                self.ctrlDock.setHostValue(self, None, self.searchSize)
+                self.ctrlDock.setHostValue(self, self.rulerOutline, self.rulerStyle, self.searchSize, self.showCircumf)
             self.ctrlDock.show()
         
+    def _clear_all(self, removeRuler = True):
+        self._clear_marker()
+        self._clear_normalRuler(removeRuler)
+        self._clear_circumfRuler(removeRuler)
+        
     def _clear_marker(self):
-        if self.ruler is not None:
-            self.ruler._destroy()
-
         for marker in self.activeMarkers:
             marker._destroy()
             
-        self.ruler         = None   
-        self.rulerPts      = None 
-        self.start_point   = None
         self.marks         = []
         self.activeMarkers = []
         
-    
+    def _clear_normalRuler(self, removeRuler = True):
+        if self.ruler is not None:
+            if removeRuler:
+                self.ruler.delete()
+            self.ruler._destroy()
+        self.ruler = None
+        self.rulerPts      = None
+        self.start_point   = None
+                        
+    def _clear_circumfRuler(self, removeRuler = True):
+        if self.circumfRuler is not None:
+            if removeRuler:
+                self.circumfRuler.delete()
+            self.circumfRuler._destroy()
+        self.circumfRuler = None
+                
     def _update_marker(self):
 
         if self.ruler is None:
             self.ruler = pya.Annotation()
             self.view.insert_annotation(self.ruler)
             
+        self.ruler.outline = self.rulerOutline
+        self.ruler.style   = self.rulerStyle
+        self.ruler.points  = self.rulerPts  
+                  
+        if self.showCircumf:
+            if self.circumfRuler is None:
+                self.circumfRuler = pya.Annotation()
+                self.circumfRuler.outline = pya.Annotation.OutlineDiag
+                self.circumfRuler.style   = pya.Annotation.StyleLine
+                self.circumfRuler.fmt     = ""
+                self.view.insert_annotation(self.circumfRuler)
+            self.setUpRadiusRuler(self.rulerPts[0], self.rulerPts[1], self.circumfRuler)
+        else:
+            if not(self.circumfRuler is None):
+                self._clear_circumfRuler(True)
+            
+                        
         for marker in self.activeMarkers:
             marker._destroy()
         self.activeMarkers = []
@@ -161,29 +238,41 @@ class CenterRulerPlugin(pya.Plugin):
                 marker.line_style = 1 
                 
             self.activeMarkers.append(marker)
-                    
-            
-        self.ruler.outline = self.rulerOutline
-        self.ruler.style   = self.rulerStyle
-        self.ruler.points  = self.rulerPts             
 
+    def setUpRadiusRuler(self, pCenter, pCurser, cRuler):
+        count   = 128
+        da      = 2 * math.pi / count 
+        center  = pya.DVector(pCenter)
+        vCursor = pya.DVector(pCurser)-pya.DVector(pCenter)
+        radius  = vCursor.length()
         
+        offset = 0
+        if vCursor.x == 0:
+            offset = math.pi / 2 * ( 1 if vCursor.y &gt;= 0 else -1) 
+        else:
+            offset = math.atan(vCursor.y/vCursor.x)
+
+        cRuler.points = [center + pya.DPoint( radius * math.cos(offset+da * i), radius * math.sin(offset+da * i)) for i in range(count + 1)]
     
     def deactivated(self):
-        self._clear_marker()
         self.ungrab_mouse()
         if (self.ctrlDock):
             self.ctrlDock.hide()
             
     def deactive(self):
+        self._clear_all()
         esc_key  = 16777216 
         keyPress = pya.QKeyEvent(pya.QKeyEvent.KeyPress, esc_key, pya.Qt.NoModifier)
         pya.QApplication.sendEvent(self.view.widget(), keyPress)  
         
     def mouse_click_event(self, p, buttons, prio):
         if prio:
-            self._clear_marker()
-            self.ungrab_mouse()
+
+            if buttons == 8:
+                self._clear_all(False)
+                self.ungrab_mouse()
+            else:
+                self.deactive()             
 
             return True
         return False
@@ -215,7 +304,7 @@ class CenterRulerPlugin(pya.Plugin):
            
                 for hoveredShape in self.shapeInRange(p, self.searchSize):
                     center     = hoveredShape.bbox().center()
-                    self.marks = self.centerMark(hoveredShape)
+                    self.marks += self.centerMark(hoveredShape)
                     
                     if self.vertexInRange(p, center, self.searchSize):
                         epDistance = center.distance(p)
