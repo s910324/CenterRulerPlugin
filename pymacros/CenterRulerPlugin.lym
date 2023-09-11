@@ -6,7 +6,7 @@
  <prolog/>
  <epilog/>
  <doc/>
- <autorun>true</autorun>
+ <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <priority>0</priority>
  <shortcut/>
@@ -139,20 +139,39 @@ class CenterRulerPlugin(pya.Plugin):
 
         self.rulerOutline   = pya.Annotation.OutlineDiagXY
         self.rulerStyle     = pya.Annotation.StyleLine
-
+        
+    def selectedAnnotationBox(self):
+        unit           = self.view.active_cellview().layout().dbu
+        selectedAnts   = [a for a in self.view.each_annotation_selected()]
+        selectedObjBox = None
+        if len(selectedAnts) == 1:
+            a = selectedAnts[0]
+            selectedObjBox = a.box()
+        return selectedObjBox
+        
+    def selectedObjectBox(self):
+        unit           = self.view.active_cellview().layout().dbu
+        selectedObjs   = [o for o in self.view.each_object_selected()]
+        selectedObjBox = None
+        if len(selectedObjs) == 1:
+            o = selectedObjs[0]
+            if not(o.is_cell_inst()):
+                if not(o.shape.is_text()): 
+                    selectedObjBox = o.shape.polygon.transformed(o.trans()).to_dtype(unit).bbox()
+            else:
+                selectedObjBox = o.inst().bbox().transformed(o.trans()).to_dtype(unit)
+        return selectedObjBox 
         
     def validselect(self):
-        unit         = self.view.active_cellview().layout().dbu
-        selectedObjs = [o for o in self.view.each_object_selected()]
-        if len(selectedObjs) == 1:
-            o                   = selectedObjs[0]
-            if not(o.is_cell_inst()):
-                self.selectedObjBox = o.shape.polygon.transformed(o.trans()).to_dtype(unit).bbox()
-            else:
-                self.selectedObjBox = o.inst().bbox().transformed(o.trans()).to_dtype(unit)
-            self.withSelected   = True
-        else:
-            self.withSelected   = False  
+        self.selectedObjBox = None
+        antBox = self.selectedAnnotationBox()
+        objBox = self.selectedObjectBox()
+        
+        if sum([antBox is None, objBox is None]) == 1:
+            self.selectedObjBox = objBox if (antBox is None) else antBox
+
+        self.withSelected = not(self.selectedObjBox is None)
+
               
     def activated(self):
         self.validselect()
@@ -282,7 +301,8 @@ class CenterRulerPlugin(pya.Plugin):
     def mouse_moved_event(self, p, buttons, prio):
         if prio :
             if  not(self.withSelected) :
-                pya.QToolTip().showText( pya.QCursor.pos, "Select one shape for split shape") 
+                tip = '\n\tSelect one Shape, Cell, Path or Ruler before activate plugin\t\n\tText object is currently not supported\t\n'
+                pya.QToolTip().showText( pya.QCursor.pos, tip) 
                 self.deactive()
                 return True
                 
@@ -390,15 +410,17 @@ class CenterRulerPlugin(pya.Plugin):
     def shapeInRange(self, point, detectRange):
         result        = []
         cellView      = self.view.active_cellview()
-        unit          = cellView.layout().dbu
+        layout        = cellView.layout()
+        unit          = layout.dbu
         cell          = cellView.cell
-        visibleLayers = [layerProp.layer_index() for layerProp in self.view.each_layer() if layerProp.visible]
+        visibleLayers = [layout.layer(layerProp.source_layer, layerProp.source_datatype) for layerProp in self.view.each_layer() if layerProp.visible]
         rngVector     = pya.DVector(detectRange, detectRange)
         searchBox     = pya.DBox(point - rngVector, point + rngVector)
-                       
+            
         for li in visibleLayers:
             for o in cell.begin_shapes_rec_touching(li, searchBox):
-                result.append(o.shape().polygon.transformed(o.trans()).to_dtype(unit))
+                if not(o.shape().is_text()):
+                    result.append(o.shape().polygon.transformed(o.trans()).to_dtype(unit))
         return result
         
     def snapPoint(self, point, edge_point): 
@@ -428,5 +450,6 @@ class CenterRulerPluginFactory(pya.PluginFactory):
     def create_plugin(self, manager, root, view):
         return CenterRulerPlugin(view)
 
-CenterRulerPluginFactory.instance = CenterRulerPluginFactory()</text>
+CenterRulerPluginFactory.instance = CenterRulerPluginFactory()
+</text>
 </klayout-macro>
