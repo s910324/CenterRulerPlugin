@@ -19,3 +19,10 @@ After installation the app can be accessed through toolbar, center ruler icon
 * adjustable ruler outline
 * adjustable ruler style
 * show circumference
+
+
+# Changelog
+## 0.01
+* Fix bug `layer index error` from unused layers
+* Supress error from Text objects
+* Add feature, Center ruler now support Ruler as target object
