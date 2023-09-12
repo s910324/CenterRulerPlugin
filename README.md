@@ -28,7 +28,7 @@ After installation the app can be accessed through toolbar, center ruler icon
 * Add feature, Center ruler now support Ruler as target object
 
 ### 0.02
-* Update shape/edge/vertex search for speed improvement
+* Update shape/edge/vertex search algorithm for speed improvement
 * Limit center mark count to 10 for speed improvement
 * Update snapping policy to improve user experience
 * Increase vertex size for better visibility
