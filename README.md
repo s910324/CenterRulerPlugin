@@ -22,7 +22,18 @@ After installation the app can be accessed through toolbar, center ruler icon
 
 
 # Changelog
-## 0.01
+### 0.01
 * Fix bug `layer index error` from unused layers
 * Supress error from Text objects
 * Add feature, Center ruler now support Ruler as target object
+
+### 0.02
+* Update shape/edge/vertex search for speed improvement
+* Limit center mark count to 10 for speed improvement
+* Update snapping policy to improve user experience
+* Increase vertex size for better visibility
+
+
+
+
+
