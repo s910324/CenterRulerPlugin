@@ -10,15 +10,13 @@ After installation the app can be accessed through toolbar, center ruler icon
 
 
 # Functions 
-* Privide ruler measured from shape center
-* Snape to edges
-* Snape to verties
-* Snap to another center
-* Hightlight center when hovered
-* adjustable snap range
-* adjustable ruler outline
-* adjustable ruler style
-* show circumference
+* Privide ruler measured from Shape/Object center
+* Privide ruler measured from Ruler center (useful for measure from spacing center)
+* Snape to Edges, Verties and Object Center
+* Center point hightlighted when object being hovered
+* Adjustable snap range
+* Adjustable ruler Outline and Style
+* Show circumference
 
 
 # Changelog
