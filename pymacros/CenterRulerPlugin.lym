@@ -6,7 +6,7 @@
  <prolog/>
  <epilog/>
  <doc/>
- <autorun>true</autorun>
+ <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <priority>0</priority>
  <shortcut/>
@@ -18,6 +18,8 @@
  <text>import os 
 import pya
 import math
+
+from itertools import chain
 
 class CenterRulerSetupDock(pya.QDockWidget):
     def __init__(self):
@@ -248,10 +250,10 @@ class CenterRulerPlugin(pya.Plugin):
             marker.vertex_size = 0  
             
             if mkType == "vertex":
-                marker.vertex_size = 8 
+                marker.vertex_size = 12 
                 
             if mkType == "edge":
-                marker.vertex_size = 4  
+                marker.vertex_size = 6  
                 
             if mkType == "cursor":
                 marker.line_style = 1 
@@ -314,45 +316,55 @@ class CenterRulerPlugin(pya.Plugin):
                 self.grab_mouse()
                 
             else:
-                cellView        = self.view.active_cellview()
-                unit            = cellView.layout().dbu
-                cell            = cellView.cell
-                minDistance     = self.searchSize
-                self.rulerPts   = [self.start_point, p]
-                self.marks = []
                 self.set_cursor(pya.Cursor.Cross)
-           
-                for hoveredShape in self.shapeInRange(p, self.searchSize):
-                    center     = hoveredShape.bbox().center()
-                    self.marks += self.centerMark(hoveredShape)
-                    
-                    if self.vertexInRange(p, center, self.searchSize):
-                        epDistance = center.distance(p)
-                        if epDistance &lt;= minDistance:
-                            minDistance   = epDistance
-                            self.rulerPts = [self.start_point, self.snapPoint(p, center)]
-                        
+                cellView         = self.view.active_cellview()
+                unit             = cellView.layout().dbu
+                cell             = cellView.cell
+                minDistance      = self.searchSize
+                hoverShapes      = self.shapeInRange(p, self.searchSize)
+                centerShapes     = sorted(hoverShapes, key = lambda hoveredShape: hoveredShape.bbox().center().distance(p))[0:10]
+                self.marks       = list(chain.from_iterable([self.centerMark(centerShape) for centerShape in centerShapes]))
+                self.rulerPts    = [self.start_point, p]
+                hlVertex         = None
+                hlEdge           = None
+                snapPoint        = p
+                
+                for hoveredShape in hoverShapes:
+                       
                     for e in hoveredShape.each_edge():
                         if self.edgeInRange(p, e, self.searchSize):
+                            epDistance  = e.distance_abs(p)
+                            pp1Distance = e.p1.distance(p)
+                            pp2Distance = e.p2.distance(p)
                             
-                            snapToVertex = False
-                            for v in [e.p1, e.p2]:
-                                if self.vertexInRange(p, v, self.searchSize):
-                                    snapToVertex = True
-                                    epDistance = v.distance(p)
-                                    if epDistance &lt;= minDistance:
-                                        minDistance   = epDistance
-                                        self.rulerPts = [self.start_point, self.snapPoint(p, v)]
-                                        self.marks.append(self.vertexMark(v))
-                                        
-                            if not(snapToVertex):            
-                                epDistance = e.distance_abs(p)
-                                if epDistance &lt;= minDistance:
-                                    minDistance   = epDistance
-                                    self.edge     = e
-                                    self.rulerPts = [self.start_point, self.snapPoint(p, e)]
-                                    self.marks.append(self.edgeMark(e))                                                
+                            if epDistance &lt;= minDistance:
+                                minDistance = epDistance
+                                snapPoint   = self.snapPoint(p, e)
+                                hlEdge      = e
+                                
+                                ppDistance = min([pp1Distance, pp2Distance])
+                                hlVertex   = None
+                                if (ppDistance &lt; (minDistance * 2)):
+                                    v = e.p1 if (pp1Distance &lt; pp2Distance) else e.p2
+                                    if self.vertexInRange(p, v, self.searchSize):
+                                        snapPoint   = self.snapPoint(p, v)
+                                        hlVertex    = v
+
+                    center = hoveredShape.bbox().center()
+                    if self.vertexInRange(p, center, self.searchSize):
+                        cpDistance = center.distance(p)
+                        if (cpDistance &lt; (minDistance * 2)):
+                            snapPoint = self.snapPoint(p, center)
+                            hlVertex  = center
                             
+                self.rulerPts = [self.start_point, snapPoint]
+                
+                if hlVertex:
+                    self.marks.append(self.vertexMark(hlVertex))     
+                     
+                if hlEdge:
+                    self.marks.append(self.edgeMark(hlEdge))                                                        
+         
                 self.marks.append(self.cursorMark(p, self.searchSize))
                 self._update_marker()
 
@@ -393,18 +405,21 @@ class CenterRulerPlugin(pya.Plugin):
         }    
         
     def vertexInRange(self, point, vertex, detectRange):
-        detected   = False
-        offset     = pya.DVector(detectRange, detectRange)
-        detectArea = pya.DBox(vertex - offset, vertex + offset )
-        if detectArea.contains(point):
-            detected = True
+        #offset     = pya.DVector(detectRange, detectRange)
+        #detectArea = pya.DBox(vertex - offset, vertex + offset )
+        #detected   =  detectArea.contains(point)
+        inXRange   = (vertex.x - detectRange) &lt;= point.x &lt;= (vertex.x + detectRange)
+        inYRange   = (vertex.y - detectRange) &lt;= point.y &lt;= (vertex.y + detectRange)
+        detected   = all([inXRange, inYRange])
         return detected
         
     def edgeInRange(self, point, edge, detectRange):
-        detected   = False
         detectArea = pya.DPath([edge.p1, edge.p2], detectRange * 2).simple_polygon()
-        if detectArea.inside(point):
-            detected = True
+        detected   = detectArea.inside(point)
+        #inXRange   = (edge.p1.x - detectRange) &lt;= point.x &lt;= (edge.p2.x + detectRange)
+        #inYRange   = (edge.p1.y - detectRange) &lt;= point.y &lt;= (edge.p2.y + detectRange)
+        #inDRange   = edge.distance_abs(point)  &lt;= detectRange
+        #detected   = all([inXRange, inYRange, inDRange])
         return detected
     
     def shapeInRange(self, point, detectRange):
@@ -413,10 +428,10 @@ class CenterRulerPlugin(pya.Plugin):
         layout        = cellView.layout()
         unit          = layout.dbu
         cell          = cellView.cell
-        visibleLayers = [layout.layer(layerProp.source_layer, layerProp.source_datatype) for layerProp in self.view.each_layer() if layerProp.visible]
+        visibleLayers = [layerProp.layer_index() for layerProp in self.view.each_layer() if (layerProp.visible and layerProp.layer_index() &gt;= 0)]
         rngVector     = pya.DVector(detectRange, detectRange)
         searchBox     = pya.DBox(point - rngVector, point + rngVector)
-            
+        
         for li in visibleLayers:
             for o in cell.begin_shapes_rec_touching(li, searchBox):
                 if not(o.shape().is_text()):
