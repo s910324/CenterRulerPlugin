@@ -9,8 +9,6 @@ This app can be installed through KLayout package manager
 After installation the app can be accessed through toolbar, center ruler icon
 
 
-
-
 # Functions 
 
 <p align="center">
@@ -32,17 +30,37 @@ After installation the app can be accessed through toolbar, center ruler icon
 
 # Changelog
 ### 0.01
-* Fix bug `layer index error` from unused layers
-* Supress error from Text objects
-* Add feature, Center ruler now support Ruler as target object
+* bug fix : Snap object error caused by unused layers
+* bug fix : Snap object error caused by Text objects
+* improve : Ruler now support another Ruler as target object
 
 ### 0.02
-* Update shape/edge/vertex search algorithm for speed improvement
-* Limit center mark count to 10 for speed improvement
-* Update snapping policy to improve user experience
-* Increase vertex size for better visibility
+* improve : Snap object performance improve by update search algorithm
+* improve : Snap object performance improve by Limit center mark count to 10 
+* improve : Snap object policy update to improve user experience
+* improve : Snap object vertex size increased for better visibility
 
+### 0.03
+* bug fix : Ruler `undo` not working properly.
+* bug fix : Snap object error caused by empty layers        
+* bug fix : Snap object snap to shapes in hidden cells.
+* bug fix : Snap object snap to shapes in hidden hierarchy levels                         
+* bug fix : Snap object incorrect when mutiple different dbu cellview is loaded           
+* bug fix : Hover hightlight when cursor enters shape bound box instead of actual shape.
+* bug fix : Plugin create multiple dock when more then one layout is loaded.
 
+* improve : Ruler support user pre-set templates.
+* improve : Ruler templates can be switched by Ctrl + Num hotkey.
+* improve : Ruler support arc, ellipse and auto measure.   
+* improve : Ruler can perform continuous measurement without pre-selecting target.
+* improve : Ruler angle can be locked to horizontal / vertical by Ctrl/Shift Key.         
+* improve : Ruler hotkey swap for quick shortcut binding.
+* improve : Snap object support snap to edge center.
+* improve : Snap object hightlight looks and feels more generic.
+* improve : Snap object support auto range, use screen px instead of um.
+* improve : Snap object performance improve by drop shapes smaller than 4px.
+* improve : Snap object performance improve by limit max search range.
+* improve : In-app Bug report link
 
 
 
