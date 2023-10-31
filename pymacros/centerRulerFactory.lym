@@ -25,29 +25,32 @@ comPathL = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "commo
 comPathG = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..", "common"))
 iconPath = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "icon"))
 
-for importPath in [libPath, comPathL if os.path.exists(importPath) else comPathG]:
+for importPath in [libPath, comPathL if os.path.exists(comPathL) else comPathG]:
     if not importPath in sys.path:
         sys.path.insert(0, importPath)
   
-import misc
-import markerTheme
-import snapHandler
-import selectHandler
-import markerHandler
+import misc_001
+import markerTheme_001
+import snapHandler_001
+import selectHandler_001
+import markerHandler_001
+import objInRangeHandler_001
 import centerRulerPlugin
 import centerRulerDock
-import objInRangeHandler
 
-reload(misc)
-reload(markerTheme)
-reload(snapHandler)
-reload(selectHandler)
-reload(markerHandler)
+
+reload(misc_001)
+reload(markerTheme_001)
+reload(snapHandler_001)
+reload(selectHandler_001)
+reload(markerHandler_001)
+reload(objInRangeHandler_001)
 reload(centerRulerPlugin)
 reload(centerRulerDock)
-reload(objInRangeHandler)
+
 
 # Future  : Alt key to enter shape select moode                                           --- v0.04
+# bug fix : snap to mid point does not match with ruler
 
 # bug fix : error caused by empty layers                                   
 # bug fix : Ruler `undo` not working properly.
