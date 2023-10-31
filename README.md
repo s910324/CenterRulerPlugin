@@ -12,8 +12,9 @@ After installation the app can be accessed through toolbar, center ruler icon
 # Functions 
 
 <p align="center">
-<img align="middle" src="https://github.com/s910324/CenterRulerPlugin/assets/1561043/09147b94-7963-4bc1-b680-532ba795210a" alt="installation" width="800"/>
+<img align="middle" src="https://github.com/s910324/CenterRulerPlugin/assets/1561043/1dd6df4c-ada6-4880-9971-3534f2167275" alt="installation" width="800"/>
 </p>
+
 
 <p align="center">
 <img align="middle" src="https://github.com/s910324/CenterRulerPlugin/assets/1561043/0a89f692-60e2-485d-b4c9-a840f49614a8" alt="installation" width="800"/>
