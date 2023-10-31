@@ -1,6 +1,6 @@
 # CenterRulerPlugin
 <p align="center">
-<img align="middle" src="https://github.com/s910324/CenterRulerPlugin/assets/1561043/9296286b-7e9b-44c3-843b-45f4d7ce151e2" alt="installation" width="800"/>
+<img align="middle" src="https://github.com/s910324/CenterRulerPlugin/assets/1561043/62877c7d-0420-4587-ab31-afb4265f9495" alt="installation" width="800"/>
 </p>
 
 
@@ -21,11 +21,10 @@ After installation the app can be accessed through toolbar, center ruler icon
 
 * Privide ruler measured from Shape/Object center
 * Privide ruler measured from Ruler center (useful for measure from spacing center)
-* Snape to Edges, Verties and Object Center
+* Snape to Edges, midpoint of a Edge, Verties and Object Center
 * Center point hightlighted when object being hovered
-* Adjustable snap range
-* Adjustable ruler Outline and Style
-* Show circumference
+* Ruler style switch hotkey `ctrl + 1~9`to select preset Rulers
+
 
 
 # Changelog
@@ -62,5 +61,9 @@ After installation the app can be accessed through toolbar, center ruler icon
 * improve : Snap object performance improve by limit max search range.
 * improve : In-app Bug report link
 
+### 0.04 
+* bug fix : Snap object vertex becomes much sensitive
+* bug fix : Snap object snap to vertex during not working properly while using `ctrl` or `shift` to lock the angle
+* bug fix : Snap object unable to snap to small distance under `ctrl` or `shift` mode is activated
 
 
