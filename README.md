@@ -1,6 +1,6 @@
 # CenterRulerPlugin
 <p align="center">
-<img align="middle" src="https://github.com/s910324/CenterRulerPlugin/assets/1561043/0c1e0674-e287-4495-b10f-568e38314519" alt="installation" width="800"/>
+<img align="middle" src="https://github.com/s910324/CenterRulerPlugin/assets/1561043/bed73a21-20e7-44ee-b8a4-dba87046cc4f" alt="installation" width="800"/>
 </p>
 
 
