@@ -4,12 +4,12 @@ import math
 import time
 import functools
 
-import misc
-import snapHandler       as snHdl
-import markerHandler     as mkHdl
-import markerTheme       as mkThm 
-import objInRangeHandler as oirHdl
-import centerRulerDock   as crd
+import misc_001              as misc
+import snapHandler_001       as snHdl
+import markerHandler_001     as mkHdl
+import markerTheme_001       as mkThm 
+import objInRangeHandler_001 as oirHdl
+import centerRulerDock       as crd
 
 
 class CenterRulerPlugin(pya.Plugin):
@@ -37,7 +37,7 @@ class CenterRulerPlugin(pya.Plugin):
         self.objInRngHdl     = oirHdl.ObjInRangeHandler(self.view)
         self.markerManager   = mkHdl.MarkerManager([self.stdRulerHandler, self.snapHandler])
         
-        self.snapHandler.setSnapPolicy(snHdl.SnapPolicy.snapDefault | snHdl.SnapPolicy.snapEdgeCenter)
+        self.snapHandler.addPolicies([snHdl.SnapPolicy.snapCenter, snHdl.SnapPolicy.snapEdgeCenter])
 
 
     def validselect(self):
@@ -173,13 +173,13 @@ class CenterRulerPlugin(pya.Plugin):
             self.set_cursor(self.cursor)
             
             if (buttons & misc.Keys.ctrl):
-                self.snapHandler.addSnapPolicies(snHdl.SnapPolicy.snapOctDir)
+                self.snapHandler.addPolicies(snHdl.SnapPolicy.snapOctDir)
 
             elif (buttons & misc.Keys.shift):
-                self.snapHandler.addSnapPolicies(snHdl.SnapPolicy.snapQuadDir)
-
+                self.snapHandler.addPolicies(snHdl.SnapPolicy.snapQuadDir)
+                 
             else : 
-                self.snapHandler.removeSnapPolicies(snHdl.SnapPolicy.snapOctDir)
+                self.snapHandler.removePolicies(snHdl.SnapPolicy.snapOctDir)
 
             
             searchRange       = min([misc.dPixelLength(self.view, 25), 50])
