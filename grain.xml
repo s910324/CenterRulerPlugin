@@ -3,7 +3,7 @@
  <name>CenterRulerPlugin</name>
  <token/>
  <hidden>false</hidden>
- <version>0.04</version>
+ <version>0.05</version>
  <api-version/>
  <title>Center ruler plugin</title>
  <doc>Provides a ruler that snaps to selected shape/object center</doc>
