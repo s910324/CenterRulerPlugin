@@ -50,8 +50,10 @@ reload(centerRulerDock)
 
 
 # Future  : Alt key to enter shape select moode                                           --- v0.04
-# bug fix : snap to mid point does not match with ruler
+# bug fix : Dockwidget RulerItemWidget causes crash on active
+# bug fix : Edge in range algorism update
 
+# bug fix : snap to mid point does not match with ruler
 # bug fix : error caused by empty layers                                   
 # bug fix : Ruler `undo` not working properly.
 # bug fix : Snap object snap to shapes in hidden cells.
@@ -78,7 +80,7 @@ class CenterRulerPluginFactory(pya.PluginFactory):
     def __init__(self):
         super(CenterRulerPluginFactory, self).__init__()
         self.register(-1000, "center_ruler_factory", "Center Ruler", iconPath + "/icon.png" )
-
+        
     def create_plugin(self, manager, root, view):
         return centerRulerPlugin.CenterRulerPlugin(view)
         
