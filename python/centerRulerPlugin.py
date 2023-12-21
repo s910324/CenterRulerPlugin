@@ -19,6 +19,7 @@ class CenterRulerPlugin(pya.Plugin):
         self.ctrlDock        = None
         self.initiallize(view)
         
+        
     def initiallize(self, view):        
         self.view            = view
         self.cellView        = None
@@ -31,7 +32,7 @@ class CenterRulerPlugin(pya.Plugin):
         self.selectedObjs    = []
         self.selectedAnts    = []
         self.selectedObjBox  = None
-        
+
         self.snapHandler     = snHdl.SnapHandler(self.view)        
         self.stdRulerHandler = mkHdl.RulerHandler(self.view)
         self.objInRngHdl     = oirHdl.ObjInRangeHandler(self.view)
@@ -67,7 +68,8 @@ class CenterRulerPlugin(pya.Plugin):
         self.initiallize(self.view)
         self.validselect()
         self.showDock()
-
+        pass
+        
     def deactivated(self):
         self.markerManager.clearAll()
         self.markerManager.updateAll()
@@ -101,7 +103,7 @@ class CenterRulerPlugin(pya.Plugin):
             
         if not(self.ctrlDock):
             self.ctrlDock = CenterRulerPlugin.dock
-            
+        
         self.ctrlDock.setHost(self)
         self.ctrlDock.show()
         
@@ -122,13 +124,12 @@ class CenterRulerPlugin(pya.Plugin):
                 self.markerManager.unbindRulers()
                 self.rulerPoints = []
                 self.markerManager.updateAll()
-                
+
             return True
         return False
             
     def mouse_click_event(self, p, buttons, prio):
         if prio:
-
             if (buttons & misc.Keys.left):
             
                 rulerProps = {
@@ -161,7 +162,6 @@ class CenterRulerPlugin(pya.Plugin):
                     self.markerManager.unbindRulers()
                     self.rulerPoints = []     
 
-            
             return True
         return False
     
@@ -169,7 +169,6 @@ class CenterRulerPlugin(pya.Plugin):
     
     def mouse_moved_event(self, p, buttons, prio):
         if prio:
-            
             self.set_cursor(self.cursor)
             
             if (buttons & misc.Keys.ctrl):
@@ -181,7 +180,6 @@ class CenterRulerPlugin(pya.Plugin):
             else : 
                 self.snapHandler.removePolicies(snHdl.SnapPolicy.snapOctDir)
 
-            
             searchRange       = min([misc.dPixelLength(self.view, 25), 50])
             sizeLimit         = misc.dPixelLength(self.view, 5)
             rangeDBox         = pya.DBox(pya.DPoint(p.x - searchRange, p.y - searchRange),pya.DPoint(p.x + searchRange, p.y + searchRange))

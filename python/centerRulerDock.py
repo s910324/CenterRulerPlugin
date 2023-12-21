@@ -90,20 +90,22 @@ class CenterRulerSetupWidget(pya.QWidget):
             if row in range(len(self.template)):
                 self.host.rulerTemplate = self.template[row]
                 
-    def updateRulerItem(self):
+    def updateRulerItem(self): ##### crash after 0.28.13
         self.container = []
         self.template  = self.getRulerTemplates()
-        self.rulerTypeLt.clear() 
         
+        self.rulerTypeLt.clear() 
+
         for i, tpl in enumerate(self.template):
-            itemWidget     = RulerItemWidget()
-            listItemIidget = pya.QListWidgetItem()              
+            listItemWidget = pya.QListWidgetItem()  
+            itemWidget     = RulerItemWidget(self)            
             itemWidget.setValue(tpl["title"], f"Ctrl + {i+1}" if i < 9 else " N / A ")
-            listItemIidget.setSizeHint(itemWidget.sizeHint())
+            listItemWidget.setSizeHint(itemWidget.sizeHint())
             self.container.append(itemWidget)
-            self.rulerTypeLt.addItem(listItemIidget)
-            self.rulerTypeLt.setItemWidget(listItemIidget, itemWidget)
- 
+            self.rulerTypeLt.addItem(listItemWidget)
+            self.rulerTypeLt.setItemWidget(listItemWidget, itemWidget)
+
+        
     def showEvent(self, event):
         self.updateRulerItem()
         event.accept()
@@ -146,8 +148,8 @@ class CenterRulerSetupWidget(pya.QWidget):
         
         
 class RulerItemWidget(pya.QWidget):
-    def __init__(self):
-        super(RulerItemWidget, self).__init__()  
+    def __init__(self, parent = None):
+        super(RulerItemWidget, self).__init__(parent)  
 
     
     def setValue(self, *args):
@@ -277,16 +279,9 @@ class SwapHotKeyDialog(pya.QDialog):
         self.close()
         
 if __name__ == "__main__":
-    #'''
-    crsw = CenterRulerSetupWidget()
-    crsw.show()
-    
-    
-    '''
-    for tpl in crsw.getRulerTemplates():
-        print (tpl)
-    
-    rbd = ReportBugDialog()
-    rbd.show()
-    '''
+    #crsw = CenterRulerSetupWidget()
+    mw   = pya.Application.instance().main_window()
+    dock = CenterRulerSetupDock()
+    mw.addDockWidget(pya.Qt_DockWidgetArea.RightDockWidgetArea, dock)
+
     
