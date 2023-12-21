@@ -12,6 +12,16 @@ class ObjInRangeHandler:
         return vertex.distance(point) <= detectRange
        
     def edgeInRange(self, point : pya.DPoint, edge : pya.DEdge, detectRange : Union[int, float], sideOnly = True):
+        if (point - edge.p1).sprod_sign(edge.d()) < 0:
+            return (detectRange >= edge.p1.distance(point)) and not(sideOnly)
+    
+        elif (point - edge.p2).sprod_sign(edge.d()) > 0:
+            return (detectRange >= edge.p2.distance(point)) and not(sideOnly)
+    
+        else:
+            return (detectRange >=  abs(edge.distance(point)))
+        
+    def edgeInRange_original(self, point : pya.DPoint, edge : pya.DEdge, detectRange : Union[int, float], sideOnly = True):
         result = False
         if edge.distance_abs(point) <= detectRange:
             result = True in [

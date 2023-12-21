@@ -83,12 +83,9 @@ def vertorLengthen(v : pya.DVector, length : float):
 def mirrorPointByEdge(p : pya.DPoint, edge : pya.DEdge):
     vx, vy = (edge.x2 - edge.x1, edge.y2 - edge.y1)
     x,  y  = (edge.x1 - p.x,     edge.y1 -     p.y)
-    r      = 1 / (vx * vx + vy * vy)
+    r      = 0 if 0 in [vx, vy] else (1 / (vx * vx + vy * vy))
 
     return pya.DPoint(
         p.x + 2 * (x - x * vx * vx * r - y * vx * vy * r), 
         p.y + 2 *( y - y * vy * vy * r - x * vx * vy * r)
     )
-
-
-
