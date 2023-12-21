@@ -66,5 +66,9 @@ After installation the app can be accessed through toolbar, center ruler icon
 * bug fix : Snap object vertex becomes much sensitive
 * bug fix : Snap object snap to vertex during not working properly while using `ctrl` or `shift` to lock the angle
 * bug fix : Snap object unable to snap to small distance under `ctrl` or `shift` mode is activated
-
+* 
+### 0.05
+* bug fix : Plugin crash on active issue version > 0.28.13
+* bug fix : Ruler snap to edge inconsist when enter angle restriction mode
+* bug fix : Ruler switch by hot key now works at version > 0.28.13 
 
